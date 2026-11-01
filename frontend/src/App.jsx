@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
   const [message, setMessage] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [imageUrl, setImageUrl] = useState("");
+  const [caption, setCaption] = useState("");
+  const [photos, setPhotos] = useState([]);
 
   async function contactBackend() {
     const response = await fetch("http://127.0.0.1:8000/message");
@@ -16,6 +18,16 @@ function App() {
     setSelectedFile(event.target.files[0]);
   }
 
+  async function fetchPhotos() {
+    const response = await fetch("http://127.0.0.1:8000/photos");
+    const data = await response.json();
+
+    setPhotos(data);
+  }
+  useEffect(() => {
+    fetchPhotos();
+  }, []);
+
   async function uploadPhoto() {
     if (!selectedFile) {
       setMessage("Please choose an image first.");
@@ -24,6 +36,7 @@ function App() {
 
     const formData = new FormData();
     formData.append("file", selectedFile);
+    formData.append("caption", caption);
 
     const response = await fetch("http://127.0.0.1:8000/photos", {
       method: "POST",
@@ -37,8 +50,8 @@ function App() {
       return;
     }
 
-    setImageUrl(data.url);
-    setMessage("Photo uploaded successfully.");
+    await fetchPhotos();
+  setMessage("Photo uploaded successfully.");
   }
 
   return (
@@ -55,21 +68,30 @@ function App() {
               onChange={handleFileChange}
       />
       <br />
-      <input type="text" placeholder="Photo caption" />
+      <input
+        type="text"
+        placeholder="Photo caption"
+        value={caption}
+        onChange={(event) => setCaption(event.target.value)}
+      />
       <button onClick={uploadPhoto}>Upload Photo</button>
 
       {message && <p>{message}</p>}
 
-      {imageUrl && (
-        <div>
-          <h2>Your Uploaded Photo</h2>
+      <div>
+      <h2>Your Photo Gallery</h2>
+
+      {photos.map((photo) => (
+        <div key={photo.id}>
           <img
-            src={imageUrl}
-            alt="Uploaded"
+            src={`http://127.0.0.1:8000/uploads/${photo.filename}`}
+            alt={photo.caption || "Uploaded photo"}
             width="400"
           />
+          <p>{photo.caption}</p>
         </div>
-      )}
+      ))}
+    </div>
 
     </div>
   )
