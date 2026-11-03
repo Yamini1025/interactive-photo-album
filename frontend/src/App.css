@@ -1,3 +1,19 @@
+.app{
+  min-height: 100vh;
+  color: #302b27
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 8%;
+  border-bottom: 1px solid #e8ded4;
+  background-color: #fffaf5;
+}
+
+
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
